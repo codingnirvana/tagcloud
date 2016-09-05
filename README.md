@@ -5,7 +5,7 @@ clouds from an RSS feed or Twitter hashtag.
 
 ## Version
 
-0.1.0
+0.1.1
 
 ## Requirements
 
