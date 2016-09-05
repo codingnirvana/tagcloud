@@ -1,0 +1,111 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Tag Cloud</title>
+    <style>
+body {
+  font: 1/1.5 "Ubuntu Sans", Helvetica, Arial, sans-serif;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+}
+
+h1 {
+  letter-spacing: 10px;
+  font-size: 2.5em;
+  text-transform: uppercase;
+}
+
+header {
+  padding: 2em 0 2em;
+  background: black;
+  color: white;
+}
+
+.error {
+  color: rgb(191, 0, 0);
+  font-size: 1.5em;
+}
+
+ul {
+  list-style: none;
+}
+
+li {
+  display: inline-block;
+  margin: .5em;
+}
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mithril/0.2.0/mithril.min.js"></script>
+    <script>
+var tagcloud = {};
+
+tagcloud.fetch = function (data) {
+  return m.request({
+    method: "GET",
+    url: "/tagcloud",
+    data: data,
+    unwrapError: function (response) { return response.error }
+  });
+};
+
+tagcloud.controller = function () {
+  var self = this;
+  this.cloud = m.prop({});
+  this.query = m.prop("");
+  this.error = m.prop("");
+  this.fetch = function (e) {
+    // Clear old values
+    self.error("");
+    self.cloud({});
+
+    var q = self.query();
+    if(q) {
+      var data = {};
+      // If query looks like a URL, issue a feed query
+      if(q.match(/^https?:\/\//i)) data.url = q;
+      // Else prepend with "#" if necessary, and issue a hashtag query
+      else data.hashtag = encodeURIComponent(q.match(/^#/) ? q : "#" + q);
+
+      tagcloud.fetch(data).then(self.cloud, self.error);
+    }
+    e.preventDefault();
+  }
+};
+
+tagcloud.view = function (ctrl) {
+  return m("section", [
+    m("header", [
+      m("h1", "Tag Cloud"),
+      // Show a form with the query input and search button
+      m("form", {onsubmit: ctrl.fetch}, [
+        m("label", {title: "Enter a hashtag or RSS feed URL"}, [
+          "Query: ",
+          m("input", {
+            placeholder: "Enter a hashtag or RSS feed URL",
+            onchange: m.withAttr("value", ctrl.query),
+            value: ctrl.query()
+          }),
+        ]),
+        m("button", {type: "submit"}, "Search"),
+      ]),
+    ]),
+    // Show any error message
+    m("p", {class: "error"}, ctrl.error()),
+    m("ul", [
+      // Show a list of the words, with font-size matching frequency
+      Object.keys(ctrl.cloud()).map(function (key) {
+        return m("li", [
+          m("span", {style: {fontSize: ctrl.cloud()[key] + "em"}}, key)
+        ])
+      })
+    ])
+  ]);
+};
+    </script>
+  </head>
+  <body>
+    <script>m.mount(document.body, tagcloud)</script>
+  </body>
+</html>
