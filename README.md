@@ -15,7 +15,7 @@ Java 8 and Maven need to be installed on the machine.
 
 At the command line, issue the command:
 
-  # mvn compile exec:java
+    # mvn compile exec:java
 
 Then point your browser to `http://localhost:4567/`.
 
@@ -23,7 +23,7 @@ Then point your browser to `http://localhost:4567/`.
 
 Issue the command:
 
-  # mvn test
+    # mvn test
 
 ## Author
 
