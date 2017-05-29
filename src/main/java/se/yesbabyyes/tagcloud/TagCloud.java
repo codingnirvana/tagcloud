@@ -10,6 +10,7 @@ import spark.Response;
 public class TagCloud {
     private TwitterClient twitterClient;
     private Set<String> stopWords;
+    private Brand brand = new Brand();
     private static final String[] STOP_WORDS = new String[] {
         "the", "of", "and", "to", "a", "in", "that", "is", "was", "he", "for",
         "it", "with", "as", "his", "on", "be", "at", "by", "she", "her", "we",
@@ -20,7 +21,7 @@ public class TagCloud {
         "just", "very", "or", "first", "second", "like", "would", "same", "rt",
         "even", "other", "new", "now", "what", "more", "will", "all", "were",
         "have", "their", "how", "off", "little", "big", "him", "into", "get",
-        "our", "may", "most", "has", "do", "some", "out", "us"
+        "our", "may", "most", "has", "do", "some", "out", "us", "stripbooks", "everything", "else"
     };
 
     /**
@@ -57,16 +58,22 @@ public class TagCloud {
         Stream<String> result;
 
         if(req.queryParams("url") != null) {
-            Feed feed = new Feed(req.queryParams("url"));
-            result = feed.getEntryContents();
+            result = brand.getCategoryTagCloud(req.queryParams("url"));
         } else if(req.queryParams("hashtag") != null) {
-            Map tweets = twitterClient.search(req.queryParams("hashtag"));
-            result = twitterClient.getTweetContents(tweets);
+            result = brand.getWordTagCloud(req.queryParams("hashtag"));
         } else {
             throw new HttpException(400, "Provide either url or hashtag");
         }
 
-        return tagCloud(wordCount(result), 100);
+        Map<String, Long> wordCount = wordCount(result);
+
+        Long maxValue = wordCount.values().stream().max(Long::compare).get();
+        Double fraction = maxValue/12.0;
+
+        Map<String, Long> modifiedWordCount = wordCount.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, e -> new Double(e.getValue() / fraction).longValue()));
+
+        return tagCloud(modifiedWordCount, 100);
     }
 
     /**

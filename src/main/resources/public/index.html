@@ -64,7 +64,7 @@ tagcloud.controller = function () {
     if(q) {
       var data = {};
       // If query looks like a URL, issue a feed query
-      if(q.match(/^https?:\/\//i)) data.url = q;
+      if(q.match(/^cat/i)) data.url = q;
       // Else prepend with "#" if necessary, and issue a hashtag query
       else data.hashtag = encodeURIComponent(q.match(/^#/) ? q : "#" + q);
 
@@ -77,13 +77,13 @@ tagcloud.controller = function () {
 tagcloud.view = function (ctrl) {
   return m("section", [
     m("header", [
-      m("h1", "Tag Cloud"),
+      m("h1", "Brand Tag Cloud"),
       // Show a form with the query input and search button
       m("form", {onsubmit: ctrl.fetch}, [
-        m("label", {title: "Enter a hashtag or RSS feed URL"}, [
+        m("label", {title: "Enter brand or cat:brand"}, [
           "Query: ",
           m("input", {
-            placeholder: "Enter a hashtag or RSS feed URL",
+            placeholder: "Enter brand or cat:brand",
             onchange: m.withAttr("value", ctrl.query),
             value: ctrl.query()
           }),
